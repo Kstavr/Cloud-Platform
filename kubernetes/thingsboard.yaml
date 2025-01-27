@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: thingsboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: thingsboard
+  template:
+    metadata:
+      labels:
+        app: thingsboard
+    spec:
+      containers:
+      - name: thingsboard
+        image: thingsboard/tb-postgres
+        ports:
+        - containerPort: 9090 # HTTP API/UI
+        - containerPort: 1883 # MQTT
+        - containerPort: 7070 # WebSocket notifications
+        - containerPort: 5683 # CoAP (UDP)
+        env:
+        - name: TB_AUTH_ENABLE_OAUTH2
+          value: "false"
+        - name: TB_QUEUE_TYPE
+          value: "in-memory"
+        volumeMounts:
+        - name: tb-data
+          mountPath: /data
+        - name: tb-logs
+          mountPath: /var/log/thingsboard
+      volumes:
+      - name: tb-data
+        emptyDir: {}
+      - name: tb-logs
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: thingsboard
+spec:
+  selector:
+    app: thingsboard
+  type: NodePort
+  ports:
+    - name: http
+      protocol: TCP
+      port: 9090       # External port for HTTP API/UI
+      targetPort: 9090 # Container's HTTP port
+      nodePort: 30990 # NodePort for HTTP
+    - name: mqtt
+      protocol: TCP
+      port: 1883       # External port for MQTT
+      targetPort: 1883 # Container's MQTT port
+      nodePort: 31883 # NodePort for MQTT
+    - name: websocket
+      protocol: TCP
+      port: 7070       # External port for WebSocket notifications
+      targetPort: 7070 # Container's WebSocket port
+      nodePort: 31707 # NodePort for WebSocket
+

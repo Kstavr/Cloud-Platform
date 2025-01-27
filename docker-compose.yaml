@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  node-red:
+    build: ./components/node-red
+    ports:
+      - "1880:1880"
+    networks:
+      - iot-network
+
+  thingsboard:
+    build: ./components/thingsboard
+    ports:
+      - "8080:8080"
+    networks:
+      - iot-network
+
+  rabbitmq:
+    build: ./components/rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - iot-network
+
+  minio:
+    build: ./components/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    networks:
+      - iot-network
+
+  keycloak:
+    build: ./components/keycloak
+    ports:
+      - "8081:8080"
+    networks:
+      - iot-network
+
+networks:
+  iot-network:
+    driver: bridge
+

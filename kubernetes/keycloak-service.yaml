@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+spec:
+  selector:
+    app: keycloak
+  type: NodePort
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080       # Internal service port
+      targetPort: 8080 # Target port where Keycloak is running
+      nodePort: 30080  # Expose this port externally
+
