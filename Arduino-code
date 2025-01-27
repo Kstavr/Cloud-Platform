@@ -1,0 +1,84 @@
+#include <HTTPClient.h>
+#include <WiFi.h>
+#include "DHT.h"
+
+// Define pins
+#define RED_LED 16
+#define GREEN_LED 25
+#define DHTPIN 4
+#define DHTTYPE DHT11
+
+// Wi-Fi credentials
+const char* ssid = "Cat-lovers97";      // Replace with your Wi-Fi SSID
+const char* password = "veligosti123Ada!@#";  // Replace with your Wi-Fi password
+
+// ThingSpeak settings
+const char* server = "http://api.thingspeak.com/update";
+const char* apiKey = "FSIX45R91V813OJP"; // Replace with your API Key
+
+
+DHT dht(DHTPIN, DHTTYPE);
+
+void setup() {
+  // Initialize serial communication
+  Serial.begin(9600);
+
+  // Initialize pins
+  pinMode(RED_LED, OUTPUT);
+  pinMode(GREEN_LED, OUTPUT);
+  
+  // Start DHT sensor
+  dht.begin();
+
+  // Connect to Wi-Fi
+  Serial.print("Connecting to Wi-Fi");
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.print(".");
+  }
+  Serial.println("\nConnected to Wi-Fi!");
+  Serial.print("IP Address: ");
+  Serial.println(WiFi.localIP());
+}
+
+void loop() {
+  float humidity = dht.readHumidity();
+  float temperature = dht.readTemperature();
+
+  if (isnan(humidity) || isnan(temperature)) {
+    Serial.println("Failed to read from DHT sensor!");
+    return;
+  }
+
+  Serial.print("Humidity: ");
+  Serial.print(humidity);
+  Serial.print("%, Temperature: ");
+  Serial.print(temperature);
+  Serial.println("°C");
+
+  if (humidity >= 50 && humidity <= 60 && temperature >= 20 && temperature <= 22) {
+    digitalWrite(GREEN_LED, HIGH);
+    digitalWrite(RED_LED, LOW);
+  } else {
+    digitalWrite(RED_LED, HIGH);
+    digitalWrite(GREEN_LED, LOW);
+  }
+
+// Send data to ThingSpeak
+  if (WiFi.status() == WL_CONNECTED) {
+    HTTPClient http;
+    String url = String(server) + "?api_key=" + apiKey +
+                 "&field1=" + String(temperature) +
+                 "&field2=" + String(humidity);
+    http.begin(url);
+    int httpResponseCode = http.GET();
+    Serial.print("HTTP Response Code: ");
+    Serial.println(httpResponseCode);
+    http.end();
+  } else {
+    Serial.println("Wi-Fi Disconnected!");
+  }
+
+  delay(2000);
+}
