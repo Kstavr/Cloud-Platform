@@ -94,4 +94,4 @@ Check client ID & secret in the Keycloak admin panel.
 Contributors
 Kstavr (Project Setup, Kubernetes Deployment, Node-RED Integration)
 License
-This project is open-source under the MIT License.
+
