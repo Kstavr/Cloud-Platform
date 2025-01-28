@@ -17,6 +17,17 @@ spec:
         image: nodered/node-red:latest
         ports:
         - containerPort: 1880 
+        env:
+        - name: NODE_RED_USERNAME
+          value: "admin"
+        - name: NODE_RED_PASSWORD
+          value: "admin"
+        - name: KEYCLOAK_AUTH_URL
+          value: "http://172.23.9.159:30080/auth"
+        - name: KEYCLOAK_REALM
+          value: "iot-realm"
+        - name: KEYCLOAK_CLIENT_ID
+          value: "node-red"
         volumeMounts:
         - name: node-red-data
           mountPath: /data
